@@ -1,0 +1,177 @@
+// Skema database RSU Aghisna Medika Sidareja
+// Provider: SQLite (file lokal, tidak butuh server database terpisah).
+//
+// ⚠️ Catatan penting: kalau situs ini di-deploy ke Vercel (serverless),
+// file SQLite ini TIDAK persisten — perubahan lewat admin panel bisa
+// hilang saat function di-restart/deploy ulang. Cocok untuk development
+// lokal atau hosting dengan disk persisten (VPS/Docker/Railway/Render).
+// Kalau nanti pindah ke Postgres hosted (Neon/Vercel Postgres), tinggal
+// ganti provider jadi "postgresql" dan DATABASE_URL di .env.
+//
+// Setelah edit file ini, jalankan: npx prisma migrate dev --name <nama_perubahan>
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ---------------------------------------------------------------------
+// Auth — 1 akun admin
+// ---------------------------------------------------------------------
+model AdminUser {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------
+// Layanan & Fasilitas
+// ---------------------------------------------------------------------
+model KategoriLayanan {
+  id        String        @id @default(cuid())
+  slug      String        @unique
+  judul     String
+  ikon      String        @default("stethoscope") // nama ikon lucide-react
+  ringkasan String
+  urutan    Int           @default(0)
+  item      LayananItem[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model LayananItem {
+  id                String          @id @default(cuid())
+  slug              String          @unique
+  nama              String
+  deskripsiLengkap  String
+  listFasilitas     String          @default("[]") // JSON array of string
+  jamOperasional    String?
+  terkaitPoliklinik Boolean         @default(false)
+  gambar            String? // path /images/fasilitas/...
+  urutan            Int             @default(0)
+  kategori          KategoriLayanan @relation(fields: [kategoriId], references: [id], onDelete: Cascade)
+  kategoriId        String
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}
+
+// ---------------------------------------------------------------------
+// Kamar Rawat Inap
+// ---------------------------------------------------------------------
+model KelasKamar {
+  id               String   @id @default(cuid())
+  slug             String   @unique
+  label            String
+  jumlah           Int // jumlah tempat tidur
+  kelompok         String // "Rawat Inap" | "Intensif" | "Khusus"
+  deskripsi        String // deskripsi singkat (untuk kartu)
+  deskripsiLengkap String // deskripsi lengkap (untuk modal/admin)
+  listFasilitas    String   @default("[]") // JSON array of string
+  gambar           String? // path /images/kamar/...
+  urutan           Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------
+// Dokter & Jadwal Praktik
+// ---------------------------------------------------------------------
+model Dokter {
+  id           String          @id @default(cuid())
+  slug         String          @unique
+  nama         String
+  gelar        String?
+  spesialisasi String
+  poliklinik   String
+  foto         String? // path /images/dokter/...
+  tipe         String          @default("spesialis") // "spesialis" | "poli_umum"
+  urutan       Int             @default(0)
+  jadwal       JadwalPraktik[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model JadwalPraktik {
+  id         String   @id @default(cuid())
+  dokter     Dokter   @relation(fields: [dokterId], references: [id], onDelete: Cascade)
+  dokterId   String
+  hari       String // Senin/Selasa/.../Sesuai Jadwal Operasi
+  jam        String // "08.00–10.00" atau "On-call"
+  status     String   @default("normal") // "normal" | "cuti"
+  keterangan String? // mis. "Cuti hingga 25 Juli 2026"
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------
+// Berita & Artikel Kesehatan
+// ---------------------------------------------------------------------
+model Artikel {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  judul     String
+  kategori  String
+  tanggal   DateTime @default(now())
+  ringkasan String
+  konten    String // HTML dari rich text editor
+  gambar    String? // path /images/berita/...
+  status    String   @default("draft") // "draft" | "published"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------
+// Lowongan Karir
+// ---------------------------------------------------------------------
+model Lowongan {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  posisi      String
+  kualifikasi String    @default("[]") // JSON array of string
+  deskripsi   String
+  batasWaktu  DateTime?
+  status      String    @default("dibuka") // "dibuka" | "ditutup"
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// ---------------------------------------------------------------------
+// Asuransi & Rekanan
+// ---------------------------------------------------------------------
+model AsuransiRekanan {
+  id       String   @id @default(cuid())
+  slug     String   @unique
+  nama     String
+  logo     String? // path /images/asuransi/...
+  kategori String // "BPJS" | "Asuransi Swasta" | "Korporat/Lainnya"
+  sejak    Int? // tahun mulai kerjasama, jika diketahui
+  urutan   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------
+// Pengumuman — baris running text di header publik (satu baris global,
+// bukan daftar; admin cukup edit teks & toggle aktif/nonaktif)
+// ---------------------------------------------------------------------
+model Pengumuman {
+  id        String   @id @default(cuid())
+  teks      String
+  aktif     Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------
+// Pengaturan Beranda (singleton — hanya 1 baris, id selalu "beranda")
+// ---------------------------------------------------------------------
+model PengaturanBeranda {
+  id          String   @id @default("beranda")
+  heroGambar  String? // path /images/hero/...
+  updatedAt   DateTime @updatedAt
+}
+

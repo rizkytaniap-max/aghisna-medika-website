@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  color: theme("colors.ink.DEFAULT");
+  background-color: theme("colors.mist.50");
+}
+
+@layer base {
+  h1, h2, h3, h4 {
+    font-family: var(--font-jakarta), system-ui, sans-serif;
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    outline: 2px solid theme("colors.teal.500");
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-content px-5 sm:px-6 lg:px-8;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-teal-600;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 ease-out;
+  }
+
+  .btn-primary {
+    @apply btn bg-teal-500 text-white shadow-soft hover:bg-teal-700 hover:shadow-card active:scale-[0.98];
+  }
+
+  .btn-outline {
+    @apply btn border border-white/40 text-white hover:bg-white/10 active:scale-[0.98];
+  }
+
+  .btn-gold {
+    @apply btn bg-gold-400 text-navy-900 shadow-soft hover:bg-gold-600 hover:text-white active:scale-[0.98];
+  }
+
+  .btn-navy {
+    @apply btn bg-navy-800 text-white shadow-soft hover:bg-navy-700 active:scale-[0.98];
+  }
+
+  .card-surface {
+    @apply rounded-2xl border border-mist-200 bg-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-card;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   Marquee pengumuman (header publik) + badge IGD berkedip
+   --------------------------------------------------------------------- */
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee-scroll 26s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+@keyframes badge-blink {
+  0%,
+  100% {
+    background-color: theme("colors.red.600");
+    opacity: 1;
+  }
+  50% {
+    background-color: theme("colors.red.800");
+    opacity: 0.75;
+  }
+}
+
+.animate-badge-blink {
+  animation: badge-blink 1.75s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+    transform: none;
+  }
+  .animate-marquee > span:last-child {
+    display: none;
+  }
+  .animate-badge-blink {
+    animation: none;
+    background-color: theme("colors.red.700");
+    opacity: 1;
+  }
+}
+

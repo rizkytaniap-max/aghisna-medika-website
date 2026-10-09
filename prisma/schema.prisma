@@ -11,7 +11,7 @@
 // Setelah edit file ini, jalankan: npx prisma migrate dev --name <nama_perubahan>
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

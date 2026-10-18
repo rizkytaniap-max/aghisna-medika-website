@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 
-const BASE_URL = "https://www.aghisnamedikasidareja.co.id";
+import { SITE_URL } from "@/lib/site";
+
+const BASE_URL = SITE_URL;
 
 const HALAMAN = [
   "",

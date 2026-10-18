@@ -1,12 +1,15 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/site";
 
+// Alamat panel admin sengaja TIDAK ditulis di sini (robots.txt bisa dibaca
+// siapa saja). Halaman admin sudah ditandai noindex di layout-nya.
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin-rsam-2026", "/admin-rsam-2026/"],
+      disallow: ["/api/"],
     },
-    sitemap: "https://www.aghisnamedikasidareja.co.id/sitemap.xml",
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }

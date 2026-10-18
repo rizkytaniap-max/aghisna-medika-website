@@ -3,6 +3,7 @@ import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 
 import "./globals.css";
 import { RUMAH_SAKIT } from "@/data/rumah-sakit";
+import { SITE_URL } from "@/lib/site";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -18,7 +19,8 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.aghisnamedikasidareja.co.id"),
+  metadataBase: new URL(SITE_URL),
+  alternates: { canonical: "/" },
   title: {
     default: `${RUMAH_SAKIT.nama} | ${RUMAH_SAKIT.tagline}`,
     template: `%s | ${RUMAH_SAKIT.namaSingkat}`,
@@ -53,7 +55,28 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id" className={`${inter.variable} ${jakarta.variable}`}>
-      <body className="font-body antialiased">{children}</body>
+      <body className="font-body antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Hospital",
+              name: "RSU Aghisna Medika Sidareja",
+              url: SITE_URL,
+              description:
+                "Rumah sakit umum Kelas D di Sidareja, Cilacap dengan layanan IGD 24 jam, poliklinik spesialis, dan rawat inap.",
+              address: {
+                "@type": "PostalAddress",
+                addressLocality: "Sidareja",
+                addressRegion: "Jawa Tengah",
+                addressCountry: "ID",
+              },
+            }),
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

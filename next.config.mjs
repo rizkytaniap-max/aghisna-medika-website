@@ -3,6 +3,8 @@ const nextConfig = {
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
+      // Foto yang diunggah lewat panel admin (Vercel Blob)
+      { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
     ],
   },
   // PENTING untuk deploy preview cepat pakai SQLite di Vercel: Next.js

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { UploadCloud, X } from "lucide-react";
 
-const MAKS_UKURAN_MB = 5;
+const MAKS_UKURAN_MB = 4;
 const TIPE_DIIZINKAN = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 export default function ImageUploadField({
@@ -46,8 +46,11 @@ export default function ImageUploadField({
 
     try {
       const res = await fetch("/api/upload", { method: "POST", body: formData });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Upload gagal.");
+      // Balasan bisa kosong/bukan JSON kalau server error, jadi jangan langsung res.json().
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.path) {
+        throw new Error(data?.error || `Upload gagal (kode ${res.status}).`);
+      }
       onChange(data.path);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload gagal.");
@@ -96,7 +99,7 @@ export default function ImageUploadField({
 
       {uploading && <p className="mt-1.5 text-xs text-teal-600">Mengunggah...</p>}
       {error && <p className="mt-1.5 text-xs text-red-600">{error}</p>}
-      <p className="mt-1.5 text-xs text-gray-400">JPG/PNG/WEBP, maksimal 5MB.</p>
+      <p className="mt-1.5 text-xs text-gray-400">JPG/PNG/WEBP, maksimal {MAKS_UKURAN_MB}MB.</p>
     </div>
   );
 }
